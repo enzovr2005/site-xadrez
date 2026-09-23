@@ -91,8 +91,14 @@ document.getElementById('historyTournament').addEventListener('change',renderHis
 document.getElementById('historySearch').addEventListener('input',renderHistory);
 document.getElementById('historyChangeFilter').addEventListener('change',renderHistory);
 
+const maxTournament=Math.max(...data.map(r=>r.lastTournament));
 function chartSVG(d){
- const pts=d.series, W=900,H=300,L=55,R=25,T=25,B=45;
+ const rawSeries=d.series, W=900,H=300,L=55,R=25,T=25,B=45;
+ const pts=[];
+ for(let t=rawSeries[0].t,idx=0;t<=maxTournament;t++){
+  if(idx<rawSeries.length&&rawSeries[idx].t===t){pts.push({t,rating:rawSeries[idx].rating});idx++;}
+  else pts.push({t,rating:pts[pts.length-1].rating});
+ }
  const allRatings=Object.values(details).flatMap(player=>player.series.map(p=>p.rating));
  const min=Math.floor(Math.min(...allRatings)/50)*50, max=Math.ceil(Math.max(...allRatings)/50)*50;
  const range=(max-min)||100;
@@ -107,7 +113,7 @@ function chartSVG(d){
 function openPlayer(name){
  const d=details[name]; if(!d)return;
  document.getElementById('mainView').classList.add('hidden'); document.getElementById('detailView').classList.add('open'); window.scrollTo(0,0);
- const title=d.title?`<span class="title">${esc(d.title)}</span> `:'';
+ const title=d.title?`<span class="title" style="width:auto;min-width:0;margin-right:8px">${esc(d.title)}</span>`:'';
  document.getElementById('detailContent').innerHTML=`<h1 class="detail-title">${title}${esc(d.name)}</h1>
  <p class="detail-sub">Clube de Xadrez da UFV · perfil de rating</p>
  <div class="stats">
